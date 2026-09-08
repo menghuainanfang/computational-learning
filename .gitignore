@@ -1,0 +1,30 @@
+# Python environments and caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Reproducible generated output (keep small test fixtures tracked)
+output/
+outputs/
+build/
+dist/
+*.o
+*.obj
+*.exe
+*.out
+*.pdb
+*.ilk
+CMakeFiles/
+CMakeCache.txt
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Operating system
+.DS_Store
+Thumbs.db
