@@ -11,8 +11,9 @@
 | 数值分析 | [numerical-analysis](numerical-analysis/README.md) | 数值误差、稳定性、收敛趋势 |
 | 数据结构与算法 | [data-structures-and-algorithms](data-structures-and-algorithms/README.md) | 正确性、边界情况、时间与空间复杂度 |
 | 机器学习 | [machine-learning](machine-learning/README.md) | 模型实现、训练过程、评价与可复现性 |
+| 最优化 | [最优化](最优化/README.md) | 梯度、步长策略、数值收敛与最优解对照 |
 
-三门课均可使用 C / C++ / Python。目前只建立课程说明，具体任务随学习进度录入，不把计划中的算法标记为已完成。
+三门课均可使用 C / C++ / Python，目前已建立课程说明。最优化专题已收录经过验证的梯度下降法实现；其他具体任务随学习进度录入，不把计划中的算法标记为已完成。
 
 ## 组织方式
 
@@ -24,6 +25,9 @@ computational-learning/
 ├── .gitignore
 ├── numerical-analysis/
 ├── data-structures-and-algorithms/
+├── 最优化/
+│   ├── README.md
+│   └── 梯度下降法/            # MiniOpt Python 包、实验与测试
 └── machine-learning/
     ├── README.md
     └── topic-name/             # 示例专题
