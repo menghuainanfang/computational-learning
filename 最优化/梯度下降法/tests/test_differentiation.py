@@ -6,7 +6,7 @@ Example: python -m pytest tests/test_differentiation.py.
 import autograd.numpy as anp
 import numpy as np
 import pytest
-from miniopt import make_gradient, finite_difference_gradient
+from 模块 import make_gradient, finite_difference_gradient
 
 
 def test_matrix_gradient():

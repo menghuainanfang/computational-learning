@@ -27,7 +27,7 @@ computational-learning/
 ├── data-structures-and-algorithms/
 ├── 最优化/
 │   ├── README.md
-│   └── 梯度下降法/            # MiniOpt Python 包、实验与测试
+│   └── 梯度下降法/            # 通用模块、完整实例与测试
 └── machine-learning/
     ├── README.md
     └── topic-name/             # 示例专题

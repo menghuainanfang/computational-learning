@@ -1,156 +1,80 @@
-# MiniOpt 0.1.0 implementation report
+# 梯度下降法实现与验证
 
-MiniOpt provides reusable gradient descent for real scalar objectives in any
-parameter dimension, with independent differentiation, step selection, results,
-and plotting. The release passes 48 automated tests and can be installed both
-as an editable checkout and from its wheel.
+本专题将可复用方法放在 `模块/`，将具体问题及其完整运行流程放在 `实例/`。
+阅读入口是 `实例/一维函数.py`，数学循环位于 `模块/梯度下降.py`。
 
-Repository: [computational-learning](https://github.com/menghuainanfang/computational-learning).
-Project directory: `最优化/梯度下降法`.
-License: MIT. Verification date: October 14, 2026.
+仓库：[computational-learning](https://github.com/menghuainanfang/computational-learning)。
+目录：`最优化/梯度下降法`。版本：0.2.0。许可：MIT。
 
-## Project structure
+## 模块职责
 
-```text
-miniopt/
-  pyproject.toml
-  MANIFEST.in
-  README.md
-  LICENSE
-  .gitignore
-  src/miniopt/
-    __init__.py
-    differentiation.py
-    step_size.py
-    results.py
-    visualization.py
-    optimizers/
-      __init__.py
-      gradient_descent.py
-  examples/
-    gradient_descent_1d.py
-    gradient_descent_2d.py
-    quadratic_optimization.py
-    learning_rate_comparison.py
-  tests/
-    test_differentiation.py
-    test_step_size.py
-    test_gradient_descent.py
-    test_visualization.py
-  docs/
-    mathematical_background.md
-    implementation_report.md
-```
-
-## Design decisions
-
-- A nonempty one-dimensional NumPy vector represents all optimization
-  parameters. Objectives return a real scalar; gradients match the vector.
-- Autograd supplies derivatives. Analytical gradients can be passed directly
-  for objectives using ordinary NumPy or external numerical code.
-- Step selection uses functions: fixed, diminishing, bounded numerical search,
-  or a custom callable. No strategy class hierarchy is needed.
-- SciPy supplies bounded search. Its candidate and both interval endpoints
-  are compared. Invalid numerical results, nonfinite evaluations, and zero
-  steps stop the run with an explicit unsuccessful result.
-- Result and history containers are dataclasses. All history arrays include
-  the initial point and have `nit + 1` entries; the initial step entry is zero.
-  Gradients are evaluated at the final accepted point, including when the
-  iteration budget has been exhausted.
-- `success=True` means approximate stationarity under the gradient tolerance.
-  Configuration and interface errors raise exceptions; numerical failures
-  return their termination reason with recorded history.
-- Matplotlib is an optional dependency. Core solver imports work without it.
-- Setuptools builds the package from a `src` layout. The source distribution
-  includes examples, tests, documentation, and the license.
-
-## Environment and dependencies
-
-The project lives in `最优化/梯度下降法` within the course repository, with its
-development environment in `.venv`. The original prototype is preserved.
-No global Python configuration was changed.
-
-| Component | Verified version | Role |
+| 文件 | 输入 | 输出 |
 | --- | --- | --- |
-| Python | 3.13.2 | Windows interpreter |
-| NumPy | 2.5.4 | Vectors and numerical operations |
-| Autograd | 1.9.1 | Automatic differentiation |
-| SciPy | 1.18.1 | Bounded scalar minimization |
-| Matplotlib | 3.11.2 | Optional figures |
-| pytest | 9.1.1 | Automated tests |
-| build | 1.6.1 | Distribution frontend |
-| setuptools | 84.0.0 | Isolated build backend |
+| 自动微分.py | 目标函数 f | 梯度函数 grad_f |
+| 步长策略.py | f、当前点、下降方向与配置 | 步长 |
+| 梯度下降.py | f、初始点、梯度及停止条件 | 优化结果 |
+| 结果记录.py | 参数、函数值、梯度长度和步长记录 | 结果与历史容器 |
+| 绘图.py | 优化结果，轨迹图还需要 f | 曲线或轨迹图 |
 
-Git uses the existing user identity. The authenticated GitHub account is
-`menghuainanfang`. Only package sources, examples, tests, and documentation
-are committed; environments, build output, plots, and logs are ignored.
+实例先定义自己的目标函数，然后调用 `make_gradient`、`gradient_descent`
+和绘图函数。求解器每轮向步长模块请求步长，不依赖具体例题或绘图。
 
-## Verification results
+参数统一为一维实数数组；目标函数返回一个实数，梯度与参数形状相同。
+结果包含初始点与最终点，四种历史数组均有 `nit + 1` 条记录。
+`success=True` 表示达到梯度容差。无效配置与接口错误抛出异常，数值失败
+则在结果中说明停止原因。
 
-| Check | Result |
+## 环境
+
+本地验证使用 Windows 与 Python 3.13.2，依赖安装在专题的 `.venv` 中。
+
+| 依赖 | 验证版本 | 用途 |
+| --- | --- | --- |
+| NumPy | 2.5.4 | 数组计算 |
+| Autograd | 1.9.1 | 自动微分 |
+| SciPy | 1.18.1 | 有界数值搜索 |
+| Matplotlib | 3.11.2 | 绘图 |
+| pytest | 9.1.1 | 测试 |
+| build | 1.6.1 | 打包 |
+
+## 验证结果
+
+自动测试 **48 项通过**，用时 1.63 秒。测试覆盖一维和多维二次函数、
+原型中的四次函数、解析梯度与差分梯度、三种步长、数值失败、停止条件、
+记录维数与绘图。四个实例均在非交互绘图环境中运行成功。
+
+可编辑安装、源码分发包和 wheel 构建均成功。独立环境安装 wheel 后，
+从专题目录之外导入模块并完成一维求解；核心模块不依赖 Matplotlib。
+
+| 实例 | 结果 |
 | --- | --- |
-| Automated suite | 48 passed in 9.58 seconds |
-| Dependency consistency | No broken requirements |
-| Editable installation | Passed |
-| Import outside the source directory | Passed |
-| Wheel installation in a separate environment | Passed |
-| Wheel-only sample optimization | Converged to [3, 3] |
-| Core import without Matplotlib | Passed |
-| Source archive and wheel build | Passed |
-| Four runnable examples | Passed |
-| Saved convergence plot | Rendered and visually inspected |
+| 一维函数 | w=-1.2347728，f(w)=-0.169969284，43 次更新达到梯度容差 |
+| 二维函数 | 数值结果接近解析解 [0, 1] |
+| 二次型 | 五维解与解析解的距离为 9.046e-9 |
+| 步长比较 | 固定步长 1、固定步长 0.1 和有界搜索达到容差；递减策略达到迭代上限 |
 
-Tests cover one-dimensional and positive definite multidimensional quadratics,
-the original quartic, analytical and central-difference gradient comparisons,
-all step strategies, and the callable extension interface. Failure cases cover
-invalid input dimensions, gradient shape mismatches, invalid rates and settings,
-nonfinite objectives, derivatives and trial iterates, stationary initial points,
-zero steps, failed searches, and consistent history including final gradients.
+## 运行命令
 
-The original quartic with fixed alpha=1 reaches approximate stationarity in
-43 updates at w=-1.2347728 and f(w)=-0.169969284. The five-dimensional quadratic
-example has solution error 9.046e-9 relative to the analytical linear solve.
+从仓库根目录进入专题：
 
-## Installation and usage
-
-```bash
-git clone https://github.com/menghuainanfang/computational-learning.git
-cd computational-learning/最优化/梯度下降法
+```powershell
+cd 最优化/梯度下降法
 python -m venv .venv
-# Windows PowerShell:
-.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-python -m pytest
-python examples/gradient_descent_1d.py --show
-python -m build
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.venv\Scripts\python.exe -m 实例.一维函数
+.venv\Scripts\python.exe -m pytest
+.venv\Scripts\python.exe -m build
 ```
 
-```python
-import autograd.numpy as np
-from miniopt import gradient_descent
+## 限制与后续方向
 
-result = gradient_descent(lambda w: np.sum((w - 3)**2),
-                          [2., -1.], step="fixed", alpha=.1)
-print(result.x, result.fun, result.message)
-```
+梯度小表示接近驻点，不保证全局最优。固定和递减步长依赖问题的尺度，
+有界数值搜索在非凸函数上不保证找到区间内的全局最佳步长。
+当前一维例题采用递减步长时，1000 次更新后得到 w=-0.39532823、
+f(w)=-0.075451461，仍未达到梯度容差。
 
-## Limitations
+目标函数需兼容 Autograd，或者由用户提供梯度。约束问题与复数参数暂不支持。
+一维、二维支持轨迹图，高维支持收敛曲线。保存全部历史的内存开销随维数和
+迭代次数增长。声明支持 Python 3.10 及以上，本地只验证了 Python 3.13.2。
 
-Success establishes approximate stationarity, not a global minimum.
-Fixed and diminishing schedules depend on objective scaling, while bounded
-numerical search has no global optimality guarantee on a nonconvex line.
-On the original quartic, diminishing alpha=1 reaches the 1,000-update limit
-at w=-0.39532823 and f(w)=-0.075451461; reducing steps slows progress on this
-example. This remains an unsuccessful termination in the reported comparison.
-
-Objectives require compatible differentiable operations or a supplied gradient.
-Constraints and complex variables are outside this release. Full history uses
-memory proportional to updates times dimension. Trajectory figures support
-one or two parameters. Verification was performed on Windows with Python
-3.13.2; the declared older Python versions were not tested locally.
-
-## Next milestone
-
-Implement Armijo backtracking through the callable step interface and verify
-its sufficient-decrease condition. Evaluation counts and optional history
-sampling would then support experiments on larger problems.
+后续可在步长模块中加入 Armijo 回溯，继续用相同实例比较步长策略。

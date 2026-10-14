@@ -1,15 +1,16 @@
-"""Differentiate scalar objectives f: R^n -> R.
+"""自动微分：把目标函数 f 变成梯度函数 grad_f。
 
-make_gradient(f) returns a callable mapping vectors to matching gradients.
-Central differences approximate partial derivatives for verification.
-Example: make_gradient(lambda w: w[0]**2)([2.0]) returns [4.0].
+f 接收一维参数向量，返回一个实数；grad_f 接收同样的向量，返回梯度向量。
+数学含义：梯度的第 i 个分量是 f 对 w[i] 的偏导数。
+例：grad_f = make_gradient(lambda w: w[0]**2)
+    grad_f([2.0])  # 得到 [4.0]
 """
 import numpy as np
 from autograd import grad
 
 
 def validate_point(w):
-    """Convert a nonempty finite real vector to an independent float array."""
+    """检查参数是否为有限实数构成的一维向量，并复制一份。"""
     if np.iscomplexobj(w):
         raise ValueError("The parameter vector must be real-valued")
     point = np.asarray(w, dtype=float).copy()
@@ -21,7 +22,7 @@ def validate_point(w):
 
 
 def objective_value(f, w):
-    """Evaluate a real scalar objective; reject vector-valued outputs."""
+    """计算 f(w)，检查返回的是一个实数，而不是数组。"""
     value = np.asarray(f(w))
     if value.shape != () or np.iscomplexobj(value):
         raise ValueError("The objective must return a real scalar")
@@ -29,7 +30,7 @@ def objective_value(f, w):
 
 
 def gradient_value(gradient, w):
-    """Evaluate a real gradient and check its dimension."""
+    """计算梯度，检查它的形状是否与参数向量相同。"""
     value = np.asarray(gradient(w))
     if value.shape != w.shape or np.iscomplexobj(value):
         raise ValueError("The gradient must be real and match the parameter shape")
@@ -37,30 +38,26 @@ def gradient_value(gradient, w):
 
 
 def make_gradient(f):
-    """Build an Autograd gradient. Use autograd.numpy inside the objective.
-
-    Failed tracing raises ValueError with the underlying error as its cause.
-    Nonfinite derivatives are returned for the solver to report numerically.
-    """
+    """返回可调用的梯度函数；目标函数中的数组运算请使用 autograd.numpy。"""
+    # Autograd 的 grad(f) 本身返回一个函数，并不是某一点的梯度值。
     derivative = grad(f)
 
     def gradient(w):
         point = validate_point(w)
         objective_value(f, point)
         try:
-            value = derivative(point)
+            return gradient_value(derivative, point)
         except Exception as exc:
             raise ValueError(
                 "Automatic differentiation failed; use autograd.numpy operations "
                 "or supply an analytical gradient"
             ) from exc
-        return gradient_value(lambda _: value, point)
 
     return gradient
 
 
 def finite_difference_gradient(f, w, epsilon=1e-6):
-    """Approximate each partial derivative with symmetric differences."""
+    """用 [f(w+h*e_i) - f(w-h*e_i)] / (2h) 近似偏导数，供核对使用。"""
     point = validate_point(w)
     if not np.isfinite(epsilon) or epsilon <= 0:
         raise ValueError("epsilon must be finite and positive")

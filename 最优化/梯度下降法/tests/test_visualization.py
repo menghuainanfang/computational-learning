@@ -8,8 +8,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from miniopt import gradient_descent
-from miniopt.visualization import (
+from 模块 import gradient_descent
+from 模块.绘图 import (
     plot_convergence, compare_results, plot_trajectory_1d, plot_trajectory_2d,
 )
 

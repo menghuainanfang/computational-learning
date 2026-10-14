@@ -1,46 +1,60 @@
-# Mathematical background
+# 数学背景
 
-Let f: R^n -> R be differentiable. At a point w, the first-order change along
-a direction d is grad f(w)^T d. Choosing d = -grad f(w) gives
--||grad f(w)||^2, which is strictly negative when the gradient is nonzero.
-Thus a sufficiently small positive step decreases a smooth objective locally.
+## 一个接口处理不同维数
 
-The iteration is
+设 f: R^n → R。参数始终用一维数组 w 表示：一个未知数写成 `[2.0]`，
+两个未知数写成 `[2.0, -1.0]`。梯度与 w 的形状相同。
 
-$$w_{k+1} = w_k - \alpha_k \nabla f(w_k).$$
+## 为什么走负梯度方向
 
-For a function with an L-Lipschitz gradient, the descent lemma gives
+在当前点 w，沿方向 d 的一阶变化率为 ∇f(w)^T d。
+令 d = -∇f(w)，得到 -||∇f(w)||²；梯度不为零时，这个数为负。
+因此，对光滑函数，足够小的正步长会使函数值下降。
+
+梯度下降每步执行：
+
+$$w_{k+1} = w_k - \alpha_k\nabla f(w_k).$$
+
+在 `模块/梯度下降.py` 中，它对应 `direction = -g` 和
+`candidate = w + length * direction`。
+
+## 步长控制什么
+
+步长控制每次沿下降方向移动的距离。太大可能越过低点甚至发散，太小可能使
+进展缓慢。固定步长和递减步长直接按公式计算；有界搜索则将目标函数限制到
+一条直线上：
+
+$$\phi(a) = f(w + a d),\qquad 0 \le a \le \alpha_{max}.$$
+
+SciPy 数值求解这个单变量问题，再比较候选点与两端点。
+
+若梯度具有 L-Lipschitz 连续性，下降引理给出：
 
 $$f(w-\alpha\nabla f(w)) \le f(w)
  - \alpha(1-L\alpha/2)\|\nabla f(w)\|^2.$$
 
-Hence 0 < alpha < 2/L ensures decrease at nonstationary points. This condition
-requires information about the objective; MiniOpt does not estimate L or
-promise convergence for arbitrary user-selected fixed steps.
+所以 0 < alpha < 2/L 时，非驻点处的函数值下降。这个条件依赖函数本身；
+程序没有自动估计 L。
 
-For a symmetric positive definite matrix A,
+## 二次型的解析解
+
+若 A 对称正定，
 
 $$f(w)=\tfrac12 w^T A w-b^T w,\qquad \nabla f(w)=Aw-b.$$
 
-The unique minimizer solves Aw=b. With a fixed step between zero and
-2/lambda_max(A), the gradient descent error contracts in the eigenbasis of A.
-The examples compare the numerical result to `numpy.linalg.solve(A, b)`.
+唯一最小点满足 Aw=b，所以实例用 `numpy.linalg.solve(A, b)` 核对数值答案。
+固定步长满足 0 < alpha < 2/lambda_max(A) 时，误差在 A 的特征方向上收缩。
 
-The diminishing schedule alpha_k = alpha_0/(k+1) reduces step lengths with
-iteration count. Its behavior still depends on smoothness, scaling, and the
-objective. It can converge slowly even on elementary quadratics.
+## 自动微分与差分
 
-Bounded numerical line search approximately minimizes f(w + alpha*d) on
-[0, alpha_max] using SciPy's bounded scalar minimizer. Both endpoints are
-compared with its candidate. On a nonconvex line, the candidate need not be a
-global minimizer. A zero best step is a stopping event, not stationarity.
+`make_gradient(f)` 调用 Autograd，按链式法则对受支持的运算求导。
+返回值是一个函数；调用 `grad_f(w)` 才得到某一点的梯度。
 
-Autograd differentiates a composition of supported operations by the chain
-rule. `autograd.numpy` supplies traceable operations. This is distinct from
-central differences, which approximate a derivative with two nearby function
-values and incur truncation and rounding errors.
+`finite_difference_gradient` 则计算
+[f(w+h*e_i) - f(w-h*e_i)]/(2h)，近似各偏导数。它用于核对，存在截断和舍入误差。
 
-MiniOpt declares success when ||grad f(w)|| <= tol. This is a stationarity
-criterion: curvature or additional structure is required to classify the
-point as a minimum. In particular, gradient descent can stop immediately
-at a saddle point if initialized exactly there.
+## 停止条件的含义
+
+程序检查 ||∇f(w)|| <= tol，并把满足此条件记为 `success=True`。
+这是近似驻点条件。驻点可能是最小点、最大点或鞍点；判断类型需要额外的
+曲率信息或问题结构。达到迭代上限或步长搜索失败时，停止原因保存在结果中。

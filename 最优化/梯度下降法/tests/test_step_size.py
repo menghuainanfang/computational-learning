@@ -6,8 +6,8 @@ failures. Example: python -m pytest tests/test_step_size.py.
 from types import SimpleNamespace
 import numpy as np
 import pytest
-import miniopt.step_size as module
-from miniopt.step_size import choose_step, StepSizeError
+import 模块.步长策略 as module
+from 模块.步长策略 import choose_step, StepSizeError
 
 
 def test_fixed_and_diminishing():

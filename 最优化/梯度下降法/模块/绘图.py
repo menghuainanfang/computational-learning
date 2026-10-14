@@ -1,12 +1,13 @@
-"""Plot scalar convergence measures and low-dimensional iterate paths.
+"""绘图：将优化结果画成收敛曲线或参数轨迹。
 
-Inputs are OptimizationResult objects and, for paths, f: R^n -> R.
-Functions return (figure, axes); show and save are optional.
-Example: plot_convergence(result, save='convergence.png').
+输入：结果对象 result；轨迹图还需要目标函数 f。
+输出：(figure, axes)，可以显示，也可以保存到指定路径。
+函数值曲线看目标函数的变化，梯度长度曲线看是否接近驻点。
+例：plot_convergence(result, show=True)
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from .differentiation import objective_value
+from .自动微分 import objective_value
 
 
 def _finish(fig, show, save):
@@ -18,12 +19,12 @@ def _finish(fig, show, save):
 
 
 def plot_convergence(result, *, show=False, save=None):
-    """Plot objective values and gradient norms, in any dimension."""
+    """画函数值与梯度长度随迭代次数变化的曲线，适用于任意维数。"""
     return compare_results({"run": result}, show=show, save=save)
 
 
 def compare_results(results, *, show=False, save=None):
-    """Compare named runs, for example runs with different learning rates."""
+    """把多次运行的收敛曲线画在一起，例如比较不同步长。"""
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     for name, result in results.items():
         axes[0].plot(result.history.fun, label=name)
@@ -39,7 +40,7 @@ def compare_results(results, *, show=False, save=None):
 
 
 def plot_trajectory_1d(f, result, *, bounds=None, show=False, save=None):
-    """Overlay recorded iterates on a one-dimensional objective curve."""
+    """画一维目标函数，并在曲线上标出迭代经过的点。"""
     if result.history.x.shape[1] != 1:
         raise ValueError("A 1-D trajectory requires one parameter")
     x = result.history.x[:, 0]
@@ -57,10 +58,7 @@ def plot_trajectory_1d(f, result, *, bounds=None, show=False, save=None):
 
 
 def plot_trajectory_2d(f, result, *, bounds=None, show=False, save=None):
-    """Overlay a two-dimensional trajectory on objective contours.
-
-    bounds is ((xmin, xmax), (ymin, ymax)); defaults cover the trajectory.
-    """
+    """画二维等高线和迭代轨迹；bounds 为 ((xmin, xmax), (ymin, ymax))。"""
     points = result.history.x
     if points.shape[1] != 2:
         raise ValueError("A 2-D trajectory requires two parameters")

@@ -1,147 +1,150 @@
-# MiniOpt
+# 梯度下降法
 
-MiniOpt is a small educational Python library for gradient descent on real,
-unconstrained, differentiable scalar objectives. It grew from exercises in
-*Machine Learning Refined: Foundations, Algorithms, and Applications*.
-The reusable solver accepts any parameter dimension through a single vector
-interface. Example objectives live outside the library.
+这一专题分成两部分：**模块保存通用方法，实例定义具体问题并把模块连接起来。**
+先读 `实例/一维函数.py`：它按五个步骤完整展示了一次求解。
 
-## Installation
+## 文件放在哪里
 
-Python 3.10 or later is required. From the repository root, first run
-`cd 最优化/梯度下降法`. Then install this package:
-
-```bash
-python -m venv .venv
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-# macOS / Linux: source .venv/bin/activate
-python -m pip install -e ".[dev]"
+```text
+梯度下降法/
+├── 模块/                   # 换一道题时可以继续使用
+│   ├── 自动微分.py         # 从 f 得到梯度函数 grad_f
+│   ├── 步长策略.py         # 决定每一步走多远
+│   ├── 梯度下降.py         # 重复：求梯度 → 选步长 → 更新参数
+│   ├── 结果记录.py         # 保存答案和每一步的记录
+│   ├── 绘图.py             # 把结果画成曲线或轨迹
+│   └── __init__.py         # 方便导入常用函数
+├── 实例/                   # 一道问题一个文件
+│   ├── 一维函数.py         # 从这里开始读
+│   ├── 二维函数.py         # 二维二次函数及等高线轨迹
+│   ├── 二次型.py           # 五维问题，与解析解比较
+│   ├── 步长比较.py         # 同一道题换不同步长
+│   └── __init__.py
+├── tests/                  # 自动检查程序正确性
+├── docs/                   # 数学说明与验证结果
+└── pyproject.toml          # 安装依赖和模块
 ```
 
-Use `python -m pip install -e .` for the core library, or `-e ".[plot]"`
-for plotting. NumPy, Autograd, and SciPy are core dependencies. Matplotlib
-is imported only by the visualization module.
+## 模块怎样拼起来
 
-## Minimal example
+1. 实例定义 `objective(w)` 和初始向量 `w0`。
+2. `make_gradient(objective)` 返回梯度函数 `grad_f`。
+3. 实例把 `objective`、`w0`、`grad_f` 和步长配置交给 `gradient_descent`。
+4. 求解器每轮调用 `choose_step`，然后执行 `w_next = w - alpha_k * grad_f(w)`。
+5. 求解器返回 `result`；实例打印它，并交给绘图模块。
+
+```mermaid
+flowchart LR
+    E[实例：目标函数与初始点] --> A[自动微分]
+    A -->|梯度函数| G[梯度下降]
+    E -->|目标函数、初始点、配置| G
+    G -->|请求步长| S[步长策略]
+    S -->|步长| G
+    G -->|结果记录| P[打印与绘图]
+```
+
+建议阅读顺序：`实例/一维函数.py` → `模块/梯度下降.py` →
+`模块/步长策略.py` → `模块/自动微分.py`。结果和绘图模块可以在需要时查看。
+
+## 安装和运行
+
+Python 3.10 或以上。在仓库根目录进入专题：
+
+```powershell
+cd 最优化/梯度下降法
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.venv\Scripts\python.exe -m 实例.一维函数
+```
+
+运行后会打印答案并显示图。其他实例的运行命令是：
+
+```powershell
+.venv\Scripts\python.exe -m 实例.二维函数
+.venv\Scripts\python.exe -m 实例.二次型
+.venv\Scripts\python.exe -m 实例.步长比较
+```
+
+在 macOS / Linux 上，将 `.venv\Scripts\python.exe` 换成 `.venv/bin/python`。
+NumPy 用于数组，Autograd 用于求梯度，SciPy 用于有界步长搜索，Matplotlib 用于绘图。
+
+## 换成自己的题目
+
+复制 `实例/一维函数.py`，修改目标函数、初始点和求解配置。例如：
 
 ```python
 import autograd.numpy as np
-from miniopt import gradient_descent
+from 模块.自动微分 import make_gradient
+from 模块.梯度下降 import gradient_descent
 
-def f(w):
-    return np.sum((w - 3.0) ** 2)
+# f: R^n → R；w 是一维数组，函数返回一个实数。
+def objective(w):
+    return np.sum((w - 3.0)**2)
 
-result = gradient_descent(f, w0=[2.0, -1.0], alpha=0.1,
-                          max_iter=1000, tol=1e-8)
-print(result.x, result.fun, result.success, result.message)
+result = gradient_descent(
+    objective,
+    w0=[2.0, -1.0],
+    gradient=make_gradient(objective),
+    step="fixed",
+    alpha=0.1,
+)
+print(result.x)
 ```
 
-An objective takes a nonempty one-dimensional real vector and returns a scalar.
-Use `autograd.numpy` for operations on differentiable variables. Ordinary NumPy
-operations may fail during tracing, and conversions such as `float(w[0])` break
-the derivative. Constants and matrices can be ordinary NumPy arrays.
-For an objective that uses ordinary NumPy or external code, supply an analytical
-gradient: `gradient_descent(f, w0, gradient=grad_f)`. Its output must match `w0`.
-`make_gradient(f)` can also be used independently; `finite_difference_gradient`
-provides a central-difference comparison for small verification problems.
+目标函数内的数组运算使用 `autograd.numpy`，避免把参与求导的量强制转换成
+`float`。如果已经有解析梯度，可以把自己的 `grad_f(w)` 直接传给 `gradient`。
+省略 `gradient` 时，求解器也会自动调用 `make_gradient`。
 
-## Step sizes
+改变参数个数时，轨迹图也要选择对应的维数：一维用 `plot_trajectory_1d`，
+二维用 `plot_trajectory_2d`；任意维数都可以使用 `plot_convergence`。
 
-| Strategy | Configuration | Definition |
+| step 配置 | 步长 | 主要参数 |
 | --- | --- | --- |
-| Fixed | `step="fixed", alpha=0.1` | alpha at every update |
-| Diminishing | `step="diminishing", alpha=0.1` | alpha / (k + 1), starting at k = 0 |
-| Bounded numerical search | `step="bounded_search", alpha_max=6.0` | SciPy bounded minimization along the descent direction |
+| `"fixed"` | 每步相同 | `alpha` |
+| `"diminishing"` | alpha / (k + 1) | `alpha` |
+| `"bounded_search"` | 在 [0, alpha_max] 内数值搜索 | `alpha_max` |
 
-Bounded search compares the numerical interior candidate with both endpoints
-of `[0, alpha_max]`. A custom callable `step(f, w, direction, k)` may return a
-nonnegative scalar step, allowing another strategy without changing the solver.
-A zero step stops the solver with `success=False`.
+## 怎样读结果
 
-## Results and plots
+| 字段 | 含义 |
+| --- | --- |
+| `result.x` | 最终参数向量 |
+| `result.fun` | 最终函数值 |
+| `result.nit` | 实际更新次数 |
+| `result.success` | 是否达到梯度容差 |
+| `result.message` | 停止原因 |
+| `result.history` | 全部迭代记录 |
 
-`result.x`, `fun`, `nit`, `success`, and `message` describe the final recorded
-iterate. `nit` counts accepted updates. `result.history` contains `x`, `fun`,
-`gradient_norm`, and `step_size`, all with `nit + 1` records. Initial values are
-included; `step_size[0] = 0`, and subsequent entries are the steps used to reach
-those records. `history.x` has shape `(nit + 1, n)`.
+历史包括初始点，所以每个记录数组都有 `nit + 1` 项。`history.x` 保存参数，
+`history.fun` 保存函数值，`history.gradient_norm` 保存梯度长度，
+`history.step_size` 保存走到各点的步长；初始点的步长记为 0。
 
-Interface mistakes raise `ValueError`. Numerical search failures and nonfinite
-trial values return an unsuccessful result at the last recorded iterate.
-A nonfinite derivative at a recorded point is retained in the history and
-reported as a failure. Exceptions raised by user functions retain their context.
-`max_iter=0` evaluates the initial point without taking an update.
+绘图函数默认不显示图，设置 `show=True` 就会显示；设置 `save="图.png"`
+可以保存图。`绘图.py` 与求解过程独立。
 
-```python
-from miniopt.visualization import plot_convergence, compare_results
+## 验证
 
-fig, axes = plot_convergence(result, show=True, save="convergence.png")
-# compare_results({"alpha=0.1": result_a, "alpha=0.2": result_b})
+```powershell
+.venv\Scripts\python.exe -m pytest
+.venv\Scripts\python.exe -m build
 ```
 
-`plot_trajectory_1d(f, result)` plots iterates over an objective curve;
-`plot_trajectory_2d(f, result)` plots iterates over contours. Each plotting
-function returns its figure and axes, defaults to `show=False`, and accepts
-an optional save path.
+验证包括解析解对照、梯度核对、三种步长、停止条件、历史记录和绘图。
+详细结果见 [实现报告](docs/implementation_report.md)，公式说明见
+[数学背景](docs/mathematical_background.md)。
 
-## Project structure
+## 适用范围与限制
 
-```text
-src/miniopt/
-  differentiation.py       Autograd and central differences
-  step_size.py             Functional step strategies
-  results.py               Dataclass results and aligned history
-  visualization.py         Optional plotting
-  optimizers/              Gradient descent
-examples/                  Four runnable optimization experiments
-tests/                     Analytical, regression, and failure tests
-docs/                      Mathematical background and implementation report
-```
+- 目前处理实数、无约束、可微的标量目标函数。
+- 梯度很小表示接近驻点，不保证找到全局最小值。
+- 固定或递减步长需要合适的尺度；有界数值搜索也不保证全局最优步长。
+- 递减策略在当前一维例题中，1000 次更新后仍未达到梯度容差。
+- 一维、二维问题可以画参数轨迹；高维问题可以画收敛曲线。
+- 保存全部历史所需的内存随维数和迭代次数增长。
 
-Run examples from the checkout after installation:
+## 来源与后续方向
 
-```bash
-python examples/gradient_descent_1d.py
-python examples/gradient_descent_2d.py
-python examples/quadratic_optimization.py
-python examples/learning_rate_comparison.py
-python -m pytest
-python -m build
-```
-
-Examples accept `--show` to open figures and `--save PATH` to save them. Create
-the destination directory first. The quadratic example prints its comparison
-with the analytical solution.
-
-## Mathematical background
-
-Gradient descent updates `w_next = w - alpha * grad f(w)`. A small gradient
-indicates approximate stationarity. See [mathematical background](docs/mathematical_background.md)
-for descent conditions and the role of the step size.
-
-## Limitations
-
-- Approximate stationarity does not imply a global minimum; a stationary point
-  may be a maximum or saddle point.
-- Fixed and diminishing steps need suitable scales. They can increase the
-  objective or diverge, and a diminishing schedule can make slow progress.
-- Bounded numerical search is approximate and does not guarantee a globally
-  optimal step on a nonconvex line. Nonfinite evaluations stop the search.
-- Objectives must be differentiable and Autograd-compatible unless an
-  analytical gradient is supplied. Constraints and complex variables are
-  outside the current interface.
-- Full iterate history uses memory proportional to dimension times updates;
-  trajectory plots are limited to one or two parameters.
-- This release is verified locally on Windows with Python 3.13.2. Other
-  supported Python versions have not been exercised in this environment.
-
-## Next milestone
-
-Add Armijo backtracking through the existing callable step interface, with
-tests for sufficient decrease. Then consider evaluation counts and optional
-history sampling for larger problems.
-
-## License
-
-MIT. Copyright 2026 menghuainanfang.
+原型来自 *Machine Learning Refined: Foundations, Algorithms, and Applications*
+相关练习；其中一维函数在原型中标注为 Exercise 3.5。
+自动微分与有界搜索分别使用 Autograd 和 SciPy。
+后续可以在步长模块中加入 Armijo 回溯。代码采用 MIT 许可。

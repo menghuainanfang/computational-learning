@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "miniopt"
-version = "0.1.0"
+version = "0.2.0"
 description = "Educational gradient descent for real scalar objectives"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,8 +16,8 @@ dependencies = ["numpy>=1.24", "autograd>=1.6", "scipy>=1.10"]
 plot = ["matplotlib>=3.7"]
 dev = ["pytest>=7", "build>=1", "matplotlib>=3.7"]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+packages = ["模块", "实例"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

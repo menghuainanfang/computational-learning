@@ -6,20 +6,22 @@
 
 | 专题 | 内容 | 语言 | 状态 |
 | --- | --- | --- | --- |
-| [梯度下降法](梯度下降法/README.md) | MiniOpt：通用梯度下降、自动微分、步长策略、轨迹绘图与测试 | Python | 已验证 |
+| [梯度下降法](梯度下降法/README.md) | 通用模块与完整实例：自动微分、步长选择、梯度下降和绘图 | Python | 已验证 |
 
-梯度下降法专题源于 *Machine Learning Refined: Foundations, Algorithms, and Applications* 的练习。可复用算法与教材例题分别放在 `src/miniopt` 和 `examples` 中；数学说明见专题下的 `docs/mathematical_background.md`。
+梯度下降法专题来源于 *Machine Learning Refined: Foundations, Algorithms, and Applications*
+相关练习。通用代码放在 `梯度下降法/模块/`，具体问题放在 `梯度下降法/实例/`。
+先从 [一维完整实例](梯度下降法/实例/一维函数.py) 开始阅读。
 
 ## 运行
 
-从仓库根目录进入专题，安装独立环境后运行：
+从仓库根目录进入专题：
 
 ```powershell
 cd 最优化/梯度下降法
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -e ".[dev]"
+.venv\Scripts\python.exe -m 实例.一维函数
 .venv\Scripts\python.exe -m pytest
-.venv\Scripts\python.exe examples/gradient_descent_1d.py --show
 ```
 
-依赖声明在专题的 `pyproject.toml` 中。实验使用 Python 3.13.2 验证；详细结果、数值限制和后续方向见 [实现报告](梯度下降法/docs/implementation_report.md)。
+依赖在 `pyproject.toml` 中声明。数学说明、验证结果和后续方向见专题的 `docs/`。

@@ -6,8 +6,8 @@ example. Example: python -m pytest tests/test_gradient_descent.py.
 import autograd.numpy as anp
 import numpy as np
 import pytest
-from miniopt import gradient_descent
-from miniopt.step_size import StepSizeError
+from 模块 import gradient_descent
+from 模块.步长策略 import StepSizeError
 
 
 @pytest.mark.parametrize("step", ["fixed", "diminishing", "bounded_search"])
