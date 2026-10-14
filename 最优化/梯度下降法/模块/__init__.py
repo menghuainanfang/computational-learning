@@ -8,6 +8,10 @@
 from .自动微分 import make_gradient, finite_difference_gradient
 from .梯度下降 import gradient_descent
 from .结果记录 import OptimizationResult, IterationHistory
+from .回溯搜索 import armijo_backtracking
+from .扩张中点搜索 import expand_midpoint_search
+from .次梯度下降 import subgradient_descent
 
 __all__ = ["gradient_descent", "make_gradient", "finite_difference_gradient",
-           "OptimizationResult", "IterationHistory"]
+           "OptimizationResult", "IterationHistory", "armijo_backtracking",
+           "expand_midpoint_search", "subgradient_descent"]

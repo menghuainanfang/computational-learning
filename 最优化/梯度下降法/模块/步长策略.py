@@ -3,31 +3,43 @@
 输入：目标函数 f、当前点 w、方向 direction、迭代编号 k 和步长配置。
 输出：一个步长 alpha_k；固定步长为 alpha，递减步长为 alpha/(k+1)。
 有界搜索近似求解 min f(w + a * direction)，其中 0 <= a <= alpha_max。
+回溯和扩张中点策略使用 Armijo 条件，额外接收当前梯度和 step_options。
 例：choose_step("fixed", f, w, -grad_f(w), k=0, alpha=0.1)
 """
 import numpy as np
 from scipy.optimize import minimize_scalar
 from .自动微分 import objective_value
-
-
-class StepSizeError(RuntimeError):
-    """步长计算遇到数值问题，供求解器记录停止原因。"""
+from .回溯搜索 import armijo_backtracking, StepSizeError
+from .扩张中点搜索 import expand_midpoint_search
 
 
 def validate_strategy(step, alpha, alpha_max):
     """检查策略名和步长参数。"""
-    if not callable(step) and step not in ("fixed", "diminishing", "bounded_search"):
-        raise ValueError("step must be fixed, diminishing, bounded_search, or callable")
+    names = ("fixed", "diminishing", "bounded_search", "armijo", "expand_midpoint")
+    if not callable(step) and step not in names:
+        raise ValueError("Unknown step strategy; use fixed, diminishing, bounded_search, armijo, expand_midpoint, or callable")
     for name, value in (("alpha", alpha), ("alpha_max", alpha_max)):
         if not np.isfinite(value) or value <= 0:
             raise ValueError(f"{name} must be finite and positive")
 
 
-def choose_step(step, f, w, direction, k, alpha=0.1, alpha_max=6.0):
+def choose_step(step, f, w, direction, k, alpha=0.1, alpha_max=6.0, *,
+                gradient=None, step_options=None):
     """根据策略返回步长；k 从 0 开始。返回 0 表示没有可用的正步长。"""
     validate_strategy(step, alpha, alpha_max)
     if not isinstance(k, (int, np.integer)) or k < 0:
         raise ValueError("k must be a nonnegative integer")
+    options = {} if step_options is None else dict(step_options)
+    if step in ("armijo", "expand_midpoint"):
+        if gradient is None:
+            raise ValueError("Armijo-based searches require the current gradient")
+        if step == "armijo":
+            return armijo_backtracking(f, w, gradient, direction, alpha0=alpha, **options)
+        return expand_midpoint_search(
+            f, w, gradient, direction, alpha0=alpha, alpha_max=alpha_max, **options
+        )
+    if options:
+        raise ValueError("step_options is only used by armijo and expand_midpoint")
     if callable(step):
         candidate = float(step(f, w, direction, k))
     elif step == "fixed":

@@ -76,3 +76,57 @@ def plot_trajectory_2d(f, result, *, bounds=None, show=False, save=None):
     ax.set(xlabel="w[0]", ylabel="w[1]")
     _finish(fig, show, save)
     return fig, ax
+
+
+def compare_line_search(results, *, show=False, save=None):
+    """比较二维线搜索：函数值、函数调用量、步长以及参数轨迹。
+
+    输入为 {名称: OptimizationResult}。函数值采用对称对数坐标，
+    既能显示接近零的变化，也能保留零值和负值。
+    """
+    fig, axes = plt.subplots(2, 2, figsize=(11, 8))
+    for name, result in results.items():
+        h = result.history
+        if h.x.shape[1] != 2:
+            plt.close(fig)
+            raise ValueError("Line-search trajectory comparison requires two parameters")
+        axes[0, 0].plot(h.fun, label=name)
+        axes[0, 1].plot(h.function_evaluations, h.fun, label=name)
+        axes[1, 0].plot(np.arange(1, result.nit + 1), h.step_size[1:], label=name)
+        axes[1, 1].plot(h.x[:, 0], h.x[:, 1], "o-", markersize=2.5, label=name)
+    axes[0, 0].set(title="Objective vs iteration", xlabel="Iteration", ylabel="f(w)")
+    axes[0, 1].set(title="Objective vs function calls", xlabel="Function calls", ylabel="f(w)")
+    for ax in axes[0]:
+        ax.set_yscale("symlog", linthresh=1e-12)
+    axes[1, 0].set(title="Accepted steps", xlabel="Update", ylabel="Step size")
+    axes[1, 1].set(title="Parameter trajectories", xlabel="w[0]", ylabel="w[1]")
+    for ax in axes.flat:
+        ax.grid(alpha=0.25)
+        ax.legend()
+    _finish(fig, show, save)
+    return fig, axes
+
+
+def compare_subgradient_runs(cases, *, show=False, save=None):
+    """画一维次梯度实验，每个初始点一行，比较函数值和参数变化。
+
+    cases 的形式为 {初始点说明: {策略名称: IterationHistory}}。
+    """
+    fig, axes = plt.subplots(len(cases), 2, figsize=(11, 4 * len(cases)), squeeze=False)
+    for row, (title, runs) in enumerate(cases.items()):
+        for name, history in runs.items():
+            if history.x.shape[1] != 1:
+                plt.close(fig)
+                raise ValueError("Subgradient trajectory comparison requires one parameter")
+            axes[row, 0].plot(history.fun, "o-", markersize=3, label=name)
+            axes[row, 1].plot(history.x[:, 0], "o-", markersize=3, label=name)
+        axes[row, 0].set(title=f"{title}: objective", ylabel="f(w)")
+        axes[row, 1].set(title=f"{title}: iterates", ylabel="w[0]")
+        for ax in axes[row]:
+            ax.axhline(0, color="gray", linewidth=0.7)
+            ax.grid(alpha=0.25)
+            ax.legend()
+    for ax in axes[-1]:
+        ax.set_xlabel("Iteration")
+    _finish(fig, show, save)
+    return fig, axes

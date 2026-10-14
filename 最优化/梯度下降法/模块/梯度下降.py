@@ -14,11 +14,12 @@ from .步长策略 import choose_step, validate_strategy, StepSizeError
 
 
 def gradient_descent(f, w0, step="fixed", alpha=0.1, max_iter=1000,
-                     tol=1e-8, alpha_max=6.0, gradient=None):
+                     tol=1e-8, alpha_max=6.0, gradient=None, step_options=None):
     """运行梯度下降，直到梯度足够小、达到迭代上限或遇到数值问题。
 
     f：目标函数；w0：初始点，例如 [2.0] 或 [2.0, -1.0]。
-    step：fixed / diminishing / bounded_search，也可以传入步长函数。
+    step：fixed / diminishing / bounded_search / armijo / expand_midpoint。
+    也可以传入步长函数；step_options 配置回溯与扩张策略的额外参数。
     alpha：固定或递减策略的初始步长；alpha_max：搜索区间上界。
     max_iter：最多更新几次；tol：梯度长度的容差。
     gradient：可选的梯度函数；省略时自动调用 make_gradient(f)。
@@ -30,17 +31,34 @@ def gradient_descent(f, w0, step="fixed", alpha=0.1, max_iter=1000,
     if not np.isfinite(tol) or tol <= 0:
         raise ValueError("tol must be finite and positive")
     w = validate_point(w0)
-    derivative = make_gradient(f) if gradient is None else gradient
+
+    # 统计经求解器包装的调用，包括搜索和自动构造梯度中的函数调用。
+    function_evaluations = 0
+    gradient_evaluations = 0
+
+    def counted_f(point):
+        nonlocal function_evaluations
+        function_evaluations += 1
+        return f(point)
+
+    derivative = make_gradient(counted_f) if gradient is None else gradient
+
+    def evaluate_gradient(point):
+        nonlocal gradient_evaluations
+        gradient_evaluations += 1
+        return gradient_value(derivative, point)
+
     # 2. 计算初始点的函数值和梯度，并记录初始状态。
-    value = objective_value(f, w)
+    value = objective_value(counted_f, w)
     if not np.isfinite(value):
         raise ValueError("The initial objective value must be finite")
-    g = gradient_value(derivative, w)
+    g = evaluate_gradient(w)
     norm = float(np.linalg.norm(g))
     points = [w.copy()]
     values = [value]
     norms = [norm]
     steps = [0.0]
+    calls = [function_evaluations]
     success = False
     message = "Maximum iterations reached"
 
@@ -59,7 +77,10 @@ def gradient_descent(f, w0, step="fixed", alpha=0.1, max_iter=1000,
         # 下降方向是负梯度；步长由“步长策略”模块决定。
         direction = -g
         try:
-            length = choose_step(step, f, w, direction, k, alpha, alpha_max)
+            length = choose_step(
+                step, counted_f, w, direction, k, alpha, alpha_max,
+                gradient=g, step_options=step_options,
+            )
         except StepSizeError as exc:
             message = str(exc)
             break
@@ -74,12 +95,12 @@ def gradient_descent(f, w0, step="fixed", alpha=0.1, max_iter=1000,
         if np.array_equal(candidate, w):
             message = "Step produced no change in the iterate"
             break
-        candidate_value = objective_value(f, candidate)
+        candidate_value = objective_value(counted_f, candidate)
         if not np.isfinite(candidate_value):
             message = "Nonfinite trial objective value"
             break
-        candidate_gradient = gradient_value(derivative, candidate)
-        # 接受新点，计算新梯度的长度，并将四种记录同步追加。
+        candidate_gradient = evaluate_gradient(candidate)
+        # 接受新点，计算新梯度的长度，并将各项记录同步追加。
         w = candidate
         value = candidate_value
         g = candidate_gradient
@@ -88,9 +109,11 @@ def gradient_descent(f, w0, step="fixed", alpha=0.1, max_iter=1000,
         values.append(value)
         norms.append(norm)
         steps.append(length)
+        calls.append(function_evaluations)
 
     # 4. 把各步记录整理成数组，再返回一个结果对象。
     history = IterationHistory(np.asarray(points), np.asarray(values),
-                               np.asarray(norms), np.asarray(steps))
+                               np.asarray(norms), np.asarray(steps), np.asarray(calls))
     return OptimizationResult(w.copy(), value, len(steps) - 1,
-                              success, message, history)
+                              success, message, history,
+                              function_evaluations, gradient_evaluations)
