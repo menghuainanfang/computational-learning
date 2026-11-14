@@ -1,0 +1,23 @@
+{
+  "local_shape": [
+    8,
+    3,
+    3
+  ],
+  "cell_to_dof_shape": [
+    8,
+    3
+  ],
+  "gradient_shape": [
+    8,
+    3,
+    2
+  ],
+  "assembly_error": 1.3877787807814457e-17,
+  "convection_error": 1.6653345369377348e-16,
+  "gradient_error": 0.0,
+  "skew_gradient": [
+    1.0,
+    2.0
+  ]
+}

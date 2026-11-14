@@ -73,3 +73,7 @@ computational-learning/
 - 推送前检查修改范围并完成与改动相称的验证；实验性改动可使用独立分支。
 
 新增课程时，沿用“课程目录 + 简短说明 + 按需增加任务”的结构。
+
+## 有限元与科学计算课程
+
+- [FEM-101：稳态反应–对流–扩散方程](courses/100-foundations/FEM-101-reaction-advection-diffusion/README.md)：教材式讲义、FEALPy程序、插图与收敛验证。
