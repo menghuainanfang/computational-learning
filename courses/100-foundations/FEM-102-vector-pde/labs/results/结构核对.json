@@ -1,0 +1,9 @@
+{
+  "kronecker_error": 4.440892098500626e-16,
+  "permutation_error": 0.0,
+  "zero_offdiag": 0.0,
+  "reaction_symmetric_eigenvalues": [
+    1.25,
+    2.75
+  ]
+}

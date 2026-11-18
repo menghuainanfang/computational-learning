@@ -76,4 +76,7 @@ computational-learning/
 
 ## 有限元与科学计算课程
 
+- [三门课程阅读入口](courses/README.md)
 - [FEM-101：稳态反应–对流–扩散方程](courses/100-foundations/FEM-101-reaction-advection-diffusion/README.md)：教材式讲义、FEALPy程序、插图与收敛验证。
+- [FEM-102：多分量耦合系统](courses/100-foundations/FEM-102-vector-pde/README.md)：向量弱形式、块装配、整体边界与误差验证。
+- [PDE-201：Burgers方程](courses/200-core/PDE-201-burgers/README.md)：非线性有限元、时间推进、非线性求解与能量分析。

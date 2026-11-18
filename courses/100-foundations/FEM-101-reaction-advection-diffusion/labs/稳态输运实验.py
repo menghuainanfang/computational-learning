@@ -116,7 +116,7 @@ def 绘制几何图(folder):
     triangles = [np.array([[0,0],[1,0],[0,1]]),
                  np.array([[0.2,0.1],[2.2,0.4],[0.8,1.6]])]
     names = [['0: (0,0)','1: (1,0)','2: (0,1)'],
-             [r'$P_0$',r'$P_1$',r'$P_2$']]
+             [r'$\boldsymbol{P}_0$',r'$\boldsymbol{P}_1$',r'$\boldsymbol{P}_2$']]
     for ax, points, labels in zip(axes,triangles,names):
         ax.add_patch(Polygon(points,facecolor='#dcecf5',edgecolor='#185572',lw=2))
         for p,label in zip(points,labels):
@@ -130,7 +130,7 @@ def 绘制几何图(folder):
         ax.set_ylabel('y' if ax is axes[1] else r'$\eta$')
     axes[0].set_title('参考单元：基函数统一定义')
     axes[1].set_title('物理单元：两条边组成雅可比矩阵')
-    fig.suptitle(r'$x=P_0+J_K\hat{x},\quad \nabla_x\phi=J_K^{-T}\nabla_{\hat{x}}\hat\phi$',fontsize=14)
+    fig.suptitle(r'$\boldsymbol{x}=\boldsymbol{P}_0+\boldsymbol{J}_K\widehat{\boldsymbol{x}},\quad \nabla_{\boldsymbol{x}}\varphi=\boldsymbol{J}_K^{-T}\nabla_{\widehat{\boldsymbol{x}}}\widehat{\varphi}$',fontsize=14)
     fig.tight_layout();fig.savefig(folder/'参考单元映射.png',dpi=160);plt.close(fig)
     fig, axes=plt.subplots(1,2,figsize=(10,4))
     ax=axes[0]
@@ -153,7 +153,7 @@ def 绘制几何图(folder):
     fig.tight_layout();fig.savefig(folder/'局部到全局装配.png',dpi=160);plt.close(fig)
 
 
-def 绘制收支图(folder):
+def 绘制守恒图(folder):
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
     fig,ax=plt.subplots(figsize=(8,4))
@@ -164,10 +164,10 @@ def 绘制收支图(folder):
     ax.text(.89,.58,'输出通量',ha='center',fontsize=13)
     ax.text(.5,.68,'控制体 W',ha='center',fontsize=15)
     ax.text(.5,.38,'源项补入 f　／　反应消耗 κu',ha='center',fontsize=13)
-    ax.text(.5,.12,r'$\mathbf{J}=\mathbf{b}u-a\nabla u$',ha='center',fontsize=19)
+    ax.text(.5,.12,r'$\boldsymbol{J}=\boldsymbol{\beta}u-a\nabla u$',ha='center',fontsize=19)
     ax.text(.5,.02,'通量包含对流与扩散；箭头表示所示边界的输入、输出',ha='center',fontsize=12)
     ax.set_xlim(0,1);ax.set_ylim(-.04,.9);ax.axis('off')
-    fig.tight_layout();fig.savefig(folder/'控制体收支.png',dpi=160);plt.close(fig)
+    fig.tight_layout();fig.savefig(folder/'控制体守恒.png',dpi=160);plt.close(fig)
 
 
 def main():
@@ -198,7 +198,7 @@ def main():
     (data/'装配核对.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
     fig,axes=plt.subplots(1,2,figsize=(9,3.8))
     h=np.array([m['h'] for m in results])
-    for ax,key,power,title in zip(axes,['L2','H1_semi'],[2,1],[r'$L^2$ 误差',r'$H^1$ 半范误差']):
+    for ax,key,power,title in zip(axes,['L2','H1_semi'],[2,1],[r'$L^2$ 误差',r'$H^1$ 半范数误差']):
         e=np.array([m[key] for m in results])
         ax.loglog(h,e,'o-',color='#185572',label='实测积分误差')
         ax.loglog(h,e[-1]*(h/h[-1])**power,'--',color='#bb5a26',label=f'{power} 阶参考线')
@@ -210,7 +210,7 @@ def main():
         ax.grid(True,which='both',alpha=.25);ax.legend()
     fig.tight_layout();fig.savefig(figures/'收敛曲线.png',dpi=160);plt.close(fig)
     绘制几何图(figures)
-    绘制收支图(figures)
+    绘制守恒图(figures)
     print(json.dumps({'checks':checks,'convergence':results},ensure_ascii=False,indent=2))
 
 
