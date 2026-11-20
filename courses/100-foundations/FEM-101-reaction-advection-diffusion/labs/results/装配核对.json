@@ -13,8 +13,8 @@
     3,
     2
   ],
-  "assembly_error": 1.3877787807814457e-17,
-  "convection_error": 1.6653345369377348e-16,
+  "assembly_error": 2.7755575615628914e-17,
+  "convection_error": 4.163336342344337e-16,
   "gradient_error": 0.0,
   "skew_gradient": [
     1.0,

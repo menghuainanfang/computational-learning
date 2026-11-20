@@ -4,7 +4,7 @@
 
 | 课程 | 主要内容 | 专题数 |
 |---|---|---:|
-| [FEM-101：稳态反应–对流–扩散方程](100-foundations/FEM-101-reaction-advection-diffusion/README.md) | 局部守恒、弱问题、单元映射、全局装配与误差估计 | 3 |
+| [FEM-101：稳态反应–对流–扩散方程](100-foundations/FEM-101-reaction-advection-diffusion/README.md) | 局部守恒、弱问题、单元映射、全局装配与误差估计 | 4 |
 | [FEM-102：多分量耦合系统](100-foundations/FEM-102-vector-pde/README.md) | 交换反应、乘积空间、块矩阵、整体边界与向量误差 | 3 |
 | [PDE-201：Burgers 方程](200-core/PDE-201-burgers/README.md) | 方程认识、非线性有限元、时间推进、误差与能量 | 4 |
 

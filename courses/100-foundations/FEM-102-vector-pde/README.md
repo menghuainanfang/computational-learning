@@ -44,3 +44,7 @@ n=8、16、32、64四档网格，双分量总自由度为162、578、2178、8450
 ## 符号规范依据
 
 数学记号遵循[Meshflow 数学符号与领域记号约定](https://github.com/suanhaitech/meshflow_group/blob/main/standards/meshflow_mathematical_notation_standard.md)，向量、矩阵和张量采用 `\boldsymbol{}`，分量使用普通数学斜体。
+
+## 综合实践
+
+[通用模型与求解器](tests/收束求解器/README.md)提供维数、次数与方程数据的独立练习；配套验证及运行方法见[验证说明](tests/README.md)。

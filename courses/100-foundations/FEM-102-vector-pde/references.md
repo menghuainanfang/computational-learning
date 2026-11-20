@@ -12,9 +12,9 @@
 
 ## 导师课程与本课对应
 
-- [模型与向量弱形式](https://github.com/suanhaitech/meshflow_group/blob/main/courses/100-foundations/FEM-102-vector-pde/notes/01-%E5%A4%9A%E5%88%86%E9%87%8F%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%BC%B1%E5%BD%A2%E5%BC%8F.md)
-- [分量排列、变系数非对角块及边界](https://github.com/suanhaitech/meshflow_group/blob/main/courses/100-foundations/FEM-102-vector-pde/notes/02-%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4%E4%B8%8E%E5%9D%97%E7%9F%A9%E9%98%B5.md)
-- [数据接口、积分器与块装配](https://github.com/suanhaitech/meshflow_group/blob/main/courses/100-foundations/FEM-102-vector-pde/notes/03-FEALPy%E5%9D%97%E8%A3%85%E9%85%8D%E4%B8%8E%E9%AA%8C%E8%AF%81.md)
+- [模型与向量弱形式](https://github.com/suanhaitech/meshflow_group/blob/4a77fa266253f8cd3f93220c9f8a422572dfa9a9/courses/100-foundations/FEM-102-vector-pde/notes/01-多分量模型与弱形式.md)
+- [分量排列、变系数非对角块及边界](https://github.com/suanhaitech/meshflow_group/blob/4a77fa266253f8cd3f93220c9f8a422572dfa9a9/courses/100-foundations/FEM-102-vector-pde/notes/02-向量空间与块矩阵.md)
+- [数据接口、积分器与块装配](https://github.com/suanhaitech/meshflow_group/blob/4a77fa266253f8cd3f93220c9f8a422572dfa9a9/courses/100-foundations/FEM-102-vector-pde/notes/03-FEALPy块装配与验证.md)
 
 本课专题一吸收交换反应与模型适定性；专题二将乘积空间、点值表排列、变反应系数和跨分量边界移项展开到实际公式与代码；专题三区分模型数据、项目组织与FEALPy对象，并保留向量误差理论及当前制造解结果。源项目的含时与SUPG实现由原项目维护，本课标准Galerkin程序未引入这些能力。
 

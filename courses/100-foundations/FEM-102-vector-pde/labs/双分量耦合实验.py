@@ -66,6 +66,8 @@ def main():
     import matplotlib.pyplot as plt
     plt.rcParams['font.sans-serif']=['Microsoft YaHei'];plt.rcParams['axes.unicode_minus']=False
     root=Path(__file__).resolve().parents[1];out=root/'labs/results';figs=root/'notes/figures'
+    out.mkdir(parents=True,exist_ok=True)
+    figs.mkdir(parents=True,exist_ok=True)
     rows=[]
     for n in (8,16,32,64):
         row,_,_,_=solve(n)

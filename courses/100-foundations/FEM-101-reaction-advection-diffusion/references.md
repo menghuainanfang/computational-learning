@@ -13,9 +13,9 @@
 
 ## 团队课程资料
 
-- [模型与弱形式](https://github.com/suanhaitech/meshflow_group/blob/main/courses/100-foundations/FEM-101-reaction-advection-diffusion/notes/01-%E7%A8%B3%E6%80%81%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%BC%B1%E5%BD%A2%E5%BC%8F.md)
-- [局部几何、自由度与装配](https://github.com/suanhaitech/meshflow_group/blob/main/courses/100-foundations/FEM-101-reaction-advection-diffusion/notes/02-%E4%BD%8E%E7%BB%B4%E6%89%8B%E7%AE%97%E4%B8%8E%E4%BA%8C%E7%BB%B4%E8%A3%85%E9%85%8D.md)
-- [实现、代数求解与强对流](https://github.com/suanhaitech/meshflow_group/blob/main/courses/100-foundations/FEM-101-reaction-advection-diffusion/notes/03-FEALPy%E6%B1%82%E8%A7%A3%E4%B8%8E%E6%95%B0%E5%80%BC%E9%AA%8C%E8%AF%81.md)
+- [模型与弱形式](https://github.com/suanhaitech/meshflow_group/blob/4a77fa266253f8cd3f93220c9f8a422572dfa9a9/courses/100-foundations/FEM-101-reaction-advection-diffusion/notes/01-稳态模型与弱形式.md)
+- [局部几何、自由度与装配](https://github.com/suanhaitech/meshflow_group/blob/4a77fa266253f8cd3f93220c9f8a422572dfa9a9/courses/100-foundations/FEM-101-reaction-advection-diffusion/notes/02-低维手算与二维装配.md)
+- [实现、代数求解与强对流](https://github.com/suanhaitech/meshflow_group/blob/4a77fa266253f8cd3f93220c9f8a422572dfa9a9/courses/100-foundations/FEM-101-reaction-advection-diffusion/notes/03-FEALPy求解与数值验证.md)
 
 三篇专题沿用团队的稳态标量定位；连续证明与教材组织在本课正文展开。新增的界面通量解释由分域分部积分得到，高阶积分次数由被积多项式次数推导，不作为新增数值实验。
 

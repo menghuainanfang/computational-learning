@@ -34,15 +34,15 @@ def 求解(n=8):
         return 2*np.pi**2*(u-1.) + g[..., 0] + 2*g[..., 1] + u
 
     form = BilinearForm(space)
-    form.add_integrator(ScalarDiffusionIntegrator(coef=1., q=5))
+    form.add_integrator(ScalarDiffusionIntegrator(coef=1., q=3))
     @cartesian
     def velocity(p):
         return np.broadcast_to(np.array([1., 2.]), p.shape)
-    form.add_integrator(ScalarConvectionIntegrator(coef=velocity, q=5))
-    form.add_integrator(ScalarMassIntegrator(coef=1., q=5))
+    form.add_integrator(ScalarConvectionIntegrator(coef=velocity, q=3))
+    form.add_integrator(ScalarMassIntegrator(coef=1., q=3))
     A = form.assembly()
     load = LinearForm(space)
-    load.add_integrator(ScalarSourceIntegrator(source=source, q=5))
+    load.add_integrator(ScalarSourceIntegrator(source=source, q=3))
     F = load.assembly()
     # 保存原始系统；强制边界后，边界行不再代表原来的平衡方程。
     boundary_mask = space.is_boundary_dof()
@@ -53,6 +53,7 @@ def 求解(n=8):
     residual = np.linalg.norm((A @ uh[:] - F)[interior]) / max(1., np.linalg.norm(F[interior]))
     points = space.interpolation_points()
     boundary_error = np.max(np.abs(uh[:][boundary_mask] - exact(points)[boundary_mask]))
+    # 误差积分独立采用更高精度，以免影响观测阶。
     bc, weights = mesh.quadrature_formula(5).get_quadrature_points_and_weights()
     points_q = mesh.bc_to_point(bc)
     error = uh.value(bc) - exact(points_q)
@@ -73,7 +74,7 @@ def 核对装配():
     @cartesian
     def velocity(p):
         return np.broadcast_to(np.array([1., 2.]), p.shape)
-    integrator = ScalarConvectionIntegrator(coef=velocity, q=5)
+    integrator = ScalarConvectionIntegrator(coef=velocity, q=3)
     local = integrator.assembly(space)
     dofs = space.cell_to_dof()
     rows = np.broadcast_to(dofs[:, :, None], local.shape)
@@ -82,7 +83,7 @@ def 核对装配():
     manual = coo_matrix((local.ravel(), (rows.ravel(), cols.ravel())),
                         shape=(count, count)).tocsr()
     form = BilinearForm(space)
-    form.add_integrator(ScalarConvectionIntegrator(coef=velocity, q=5))
+    form.add_integrator(ScalarConvectionIntegrator(coef=velocity, q=3))
     assembled = form.assembly().to_scipy()
     difference = manual - assembled
     assembly_error = np.max(np.abs(difference.data), initial=0.)
@@ -216,4 +217,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
